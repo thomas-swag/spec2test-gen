@@ -76,24 +76,24 @@ const Dashboard = () => {
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <StatsCard
-            title="Test Cases Generated"
+            title="Total Test Cases Generated"
             value="1,247"
-            description="Total across all projects"
+            description="Across all projects"
             icon={TestTube2}
             trend={{ value: 12, isPositive: true }}
           />
           <StatsCard
-            title="Average Compliance Score"
-            value="94%"
-            description="Meeting regulatory standards"
+            title="Compliance-Covered Test Cases"
+            value="984"
+            description="Mapped to compliance standards"
             icon={Shield}
-            trend={{ value: 3, isPositive: true }}
+            trend={{ value: 8, isPositive: true }}
           />
           <StatsCard
-            title="Active Projects"
-            value="8"
-            description="Currently in development"
-            icon={FolderOpen}
+            title="Compliance Coverage"
+            value="79%"
+            description="Test cases with compliance mapping"
+            icon={Shield}
           />
           <StatsCard
             title="Time Saved"
@@ -140,7 +140,6 @@ const Dashboard = () => {
                     <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
                     <div className="flex items-center space-x-4 mt-2 text-xs text-muted-foreground">
                       <span>{project.testCases} test cases</span>
-                      <span>{project.compliance}% compliance</span>
                       <span>Updated {project.lastUpdated}</span>
                     </div>
                   </div>

@@ -167,7 +167,7 @@ const Projects = () => {
                       </div>
                       <div className="flex items-center space-x-1">
                         <Shield className="w-4 h-4 text-success" />
-                        <span>{project.compliance}% compliance</span>
+                        <span>{project.documentsCount} documents</span>
                       </div>
                     </div>
                     <div className="flex items-center space-x-1 text-muted-foreground">

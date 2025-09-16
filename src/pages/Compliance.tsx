@@ -7,16 +7,18 @@ import {
   Search, 
   ExternalLink, 
   Shield, 
-  CheckCircle, 
-  AlertCircle,
+  TestTube2,
   Filter,
-  Download
+  Download,
+  Clock
 } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 // Mock compliance traceability data
 const complianceData = [
   {
     id: 1,
+    projectId: 1,
     standard: "FDA 21 CFR Part 820",
     section: "820.30",
     clause: "Design Controls",
@@ -25,11 +27,11 @@ const complianceData = [
       { id: "TC-001", title: "Verify heart rate measurement accuracy" },
       { id: "TC-005", title: "Validate design requirement traceability" }
     ],
-    coverage: 85,
-    status: "Compliant"
+    testCaseCount: 2
   },
   {
     id: 2,
+    projectId: 1,
     standard: "IEC 62304",
     section: "5.2",
     clause: "Software requirements analysis",
@@ -38,11 +40,11 @@ const complianceData = [
       { id: "TC-002", title: "Test alarm functionality for critical values" },
       { id: "TC-006", title: "Software requirement validation" }
     ],
-    coverage: 92,
-    status: "Compliant"
+    testCaseCount: 2
   },
   {
     id: 3,
+    projectId: 2,
     standard: "ISO 13485",
     section: "7.3.3",
     clause: "Design and development outputs",
@@ -50,11 +52,11 @@ const complianceData = [
     linkedTestCases: [
       { id: "TC-003", title: "Validate data storage integrity" }
     ],
-    coverage: 67,
-    status: "Partial"
+    testCaseCount: 1
   },
   {
     id: 4,
+    projectId: 1,
     standard: "FDA Cybersecurity",
     section: "2.0",
     clause: "Cybersecurity Risk Management",
@@ -63,11 +65,11 @@ const complianceData = [
       { id: "TC-004", title: "Test user authentication security" },
       { id: "TC-007", title: "Cybersecurity vulnerability assessment" }
     ],
-    coverage: 78,
-    status: "Needs Review"
+    testCaseCount: 2
   },
   {
     id: 5,
+    projectId: 1,
     standard: "IEC 60601-1-8",
     section: "6.3",
     clause: "Alarm system requirements",
@@ -76,54 +78,46 @@ const complianceData = [
       { id: "TC-002", title: "Test alarm functionality for critical values" },
       { id: "TC-008", title: "Alarm signal differentiation test" }
     ],
-    coverage: 94,
-    status: "Compliant"
+    testCaseCount: 2
   }
 ];
 
+// Mock projects data
+const projects = [
+  { id: 1, name: "Medical Device Validation" },
+  { id: 2, name: "Software Risk Analysis" }
+];
+
 const Compliance = () => {
+  const { projectId } = useParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [standardFilter, setStandardFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedProjectId, setSelectedProjectId] = useState(projectId || "all");
 
   const filteredData = complianceData.filter(item => {
     const matchesSearch = item.standard.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.clause.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.requirement.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStandard = standardFilter === "all" || item.standard.includes(standardFilter);
-    const matchesStatus = statusFilter === "all" || item.status === statusFilter;
-    return matchesSearch && matchesStandard && matchesStatus;
+    const matchesProject = selectedProjectId === "all" || item.projectId.toString() === selectedProjectId;
+    return matchesSearch && matchesStandard && matchesProject;
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Compliant":
-        return "bg-success/10 text-success border-success/20";
-      case "Partial":
-        return "bg-warning/10 text-warning border-warning/20";
-      case "Needs Review":
-        return "bg-destructive/10 text-destructive border-destructive/20";
-      default:
-        return "bg-muted text-muted-foreground";
+  // Calculate metrics
+  const totalTestCases = 120;
+  const complianceCoveredTestCases = 95;
+  const complianceCoverage = Math.round((complianceCoveredTestCases / totalTestCases) * 100);
+  const unmappedTestCases = totalTestCases - complianceCoveredTestCases;
+  
+  // Get standards metrics for current filter
+  const standardsMetrics = filteredData.reduce((acc, item) => {
+    const standardName = item.standard.split(' ')[0];
+    if (!acc[standardName]) {
+      acc[standardName] = 0;
     }
-  };
-
-  const getCoverageColor = (coverage: number) => {
-    if (coverage >= 90) return "text-success";
-    if (coverage >= 70) return "text-warning";
-    return "text-destructive";
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "Compliant":
-        return <CheckCircle className="w-4 h-4 text-success" />;
-      case "Needs Review":
-        return <AlertCircle className="w-4 h-4 text-destructive" />;
-      default:
-        return <AlertCircle className="w-4 h-4 text-warning" />;
-    }
-  };
+    acc[standardName] += item.testCaseCount;
+    return acc;
+  }, {} as Record<string, number>);
 
   const uniqueStandards = [...new Set(complianceData.map(item => item.standard.split(' ')[0]))];
 
@@ -135,17 +129,13 @@ const Compliance = () => {
           <div>
             <h1 className="text-3xl font-bold text-foreground">Compliance Traceability</h1>
             <p className="text-muted-foreground mt-2">
-              Track compliance standards and their linked test cases across all projects.
+              Track compliance standards and their linked test cases{selectedProjectId !== "all" ? " for selected project" : " across all projects"}.
             </p>
           </div>
           <div className="flex items-center space-x-3 mt-4 md:mt-0">
             <Button variant="outline">
               <Download className="w-4 h-4 mr-2" />
               Export Report
-            </Button>
-            <Button variant="outline">
-              <Shield className="w-4 h-4 mr-2" />
-              Compliance Dashboard
             </Button>
           </div>
         </div>
@@ -155,10 +145,10 @@ const Compliance = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center space-x-3">
-                <CheckCircle className="w-8 h-8 text-success" />
+                <TestTube2 className="w-8 h-8 text-primary" />
                 <div>
-                  <p className="text-2xl font-bold text-foreground">3</p>
-                  <p className="text-sm text-muted-foreground">Compliant Standards</p>
+                  <p className="text-2xl font-bold text-foreground">{totalTestCases}</p>
+                  <p className="text-sm text-muted-foreground">Total Test Cases Generated</p>
                 </div>
               </div>
             </CardContent>
@@ -166,21 +156,10 @@ const Compliance = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center space-x-3">
-                <AlertCircle className="w-8 h-8 text-warning" />
+                <Shield className="w-8 h-8 text-success" />
                 <div>
-                  <p className="text-2xl font-bold text-foreground">1</p>
-                  <p className="text-sm text-muted-foreground">Partial Coverage</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <AlertCircle className="w-8 h-8 text-destructive" />
-                <div>
-                  <p className="text-2xl font-bold text-foreground">1</p>
-                  <p className="text-sm text-muted-foreground">Needs Review</p>
+                  <p className="text-2xl font-bold text-foreground">{complianceCoveredTestCases}</p>
+                  <p className="text-sm text-muted-foreground">Compliance-Covered Test Cases</p>
                 </div>
               </div>
             </CardContent>
@@ -190,13 +169,43 @@ const Compliance = () => {
               <div className="flex items-center space-x-3">
                 <Shield className="w-8 h-8 text-accent" />
                 <div>
-                  <p className="text-2xl font-bold text-foreground">83%</p>
-                  <p className="text-sm text-muted-foreground">Overall Coverage</p>
+                  <p className="text-2xl font-bold text-foreground">{complianceCoverage}%</p>
+                  <p className="text-sm text-muted-foreground">Compliance Coverage</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-3">
+                <Clock className="w-8 h-8 text-warning" />
+                <div>
+                  <p className="text-2xl font-bold text-foreground">42h</p>
+                  <p className="text-sm text-muted-foreground">Time Saved</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Standards Metrics */}
+        {Object.keys(standardsMetrics).length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Test Cases by Standard</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {Object.entries(standardsMetrics).map(([standard, count]) => (
+                  <div key={standard} className="text-center p-3 bg-secondary/30 rounded-lg">
+                    <div className="text-lg font-bold text-foreground">{count}</div>
+                    <div className="text-xs text-muted-foreground">{standard}</div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Filters */}
         <Card className="mb-6">
@@ -213,9 +222,20 @@ const Compliance = () => {
                   />
                 </div>
               </div>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <Filter className="w-4 h-4 text-muted-foreground" />
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Filter className="w-4 h-4 text-muted-foreground" />
+                    <select
+                      value={selectedProjectId}
+                      onChange={(e) => setSelectedProjectId(e.target.value)}
+                      className="border border-border rounded-md px-3 py-2 bg-background text-foreground"
+                    >
+                      <option value="all">All Projects</option>
+                      {projects.map(project => (
+                        <option key={project.id} value={project.id.toString()}>{project.name}</option>
+                      ))}
+                    </select>
+                  </div>
                   <select
                     value={standardFilter}
                     onChange={(e) => setStandardFilter(e.target.value)}
@@ -227,17 +247,6 @@ const Compliance = () => {
                     ))}
                   </select>
                 </div>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="border border-border rounded-md px-3 py-2 bg-background text-foreground"
-                >
-                  <option value="all">All Status</option>
-                  <option value="Compliant">Compliant</option>
-                  <option value="Partial">Partial</option>
-                  <option value="Needs Review">Needs Review</option>
-                </select>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -257,30 +266,24 @@ const Compliance = () => {
                   key={item.id}
                   className="border border-border rounded-lg p-6 hover:shadow-lg transition-all duration-300"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <Badge variant="outline" className="font-mono text-xs">
-                          {item.standard}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          Section {item.section}
-                        </Badge>
-                        <Badge className={getStatusColor(item.status)}>
-                          {getStatusIcon(item.status)}
-                          <span className="ml-1">{item.status}</span>
-                        </Badge>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <Badge variant="outline" className="font-mono text-xs">
+                            {item.standard}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            Section {item.section}
+                          </Badge>
+                          <Badge className="bg-primary/10 text-primary border-primary/20">
+                            <TestTube2 className="w-3 h-3 mr-1" />
+                            {item.testCaseCount} tests
+                          </Badge>
+                        </div>
+                        <h3 className="font-semibold text-foreground text-lg mb-2">{item.clause}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{item.requirement}</p>
                       </div>
-                      <h3 className="font-semibold text-foreground text-lg mb-2">{item.clause}</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{item.requirement}</p>
                     </div>
-                    <div className="text-right ml-4">
-                      <div className={`text-2xl font-bold ${getCoverageColor(item.coverage)}`}>
-                        {item.coverage}%
-                      </div>
-                      <p className="text-xs text-muted-foreground">Coverage</p>
-                    </div>
-                  </div>
 
                   <div className="border-t border-border pt-4">
                     <p className="text-sm font-medium text-foreground mb-3">Linked Test Cases:</p>

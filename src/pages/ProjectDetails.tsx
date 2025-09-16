@@ -149,8 +149,8 @@ const ProjectDetails = () => {
               <div className="flex items-center space-x-3">
                 <Shield className="w-8 h-8 text-success" />
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{project.compliance}%</p>
-                  <p className="text-sm text-muted-foreground">Compliance Score</p>
+                  <p className="text-2xl font-bold text-foreground">{project.standards.length}</p>
+                  <p className="text-sm text-muted-foreground">Standards</p>
                 </div>
               </div>
             </CardContent>
@@ -303,6 +303,24 @@ const ProjectDetails = () => {
                 </Card>
               </TabsContent>
             </Tabs>
+            
+            {/* Action Buttons */}
+            <div className="mt-6 pt-6 border-t border-border">
+              <div className="space-y-2">
+                <Link to={`/projects/${project.id}/test-cases`}>
+                  <Button className="w-full">
+                    <TestTube2 className="w-4 h-4 mr-2" />
+                    View All Test Cases
+                  </Button>
+                </Link>
+                <Link to={`/compliance/${project.id}`}>
+                  <Button variant="outline" className="w-full">
+                    <Shield className="w-4 h-4 mr-2" />
+                    Compliance Traceability
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
