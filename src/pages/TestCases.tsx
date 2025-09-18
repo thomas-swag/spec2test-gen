@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { PriorityToggle, TestCaseStatusToggle } from "@/components/StatusToggle";
 import { 
   ArrowLeft, 
   Download, 
@@ -77,11 +79,13 @@ const testCases = [
 
 const TestCases = () => {
   const { id } = useParams();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [testCasesList, setTestCasesList] = useState(testCases);
 
-  const filteredTestCases = testCases.filter(testCase => {
+  const filteredTestCases = testCasesList.filter(testCase => {
     const matchesSearch = testCase.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          testCase.requirement.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPriority = priorityFilter === "all" || testCase.priority === priorityFilter;
@@ -102,17 +106,24 @@ const TestCases = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Active":
-        return "bg-success/10 text-success border-success/20";
-      case "Review":
-        return "bg-warning/10 text-warning border-warning/20";
-      case "Completed":
-        return "bg-muted text-muted-foreground";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
+  const handlePriorityChange = (testCaseId: string, newPriority: string) => {
+    setTestCasesList(prev => prev.map(tc => 
+      tc.id === testCaseId ? { ...tc, priority: newPriority } : tc
+    ));
+    toast({
+      title: "Priority Updated",
+      description: `Test case priority changed to ${newPriority}`,
+    });
+  };
+
+  const handleStatusChange = (testCaseId: string, newStatus: string) => {
+    setTestCasesList(prev => prev.map(tc => 
+      tc.id === testCaseId ? { ...tc, status: newStatus } : tc
+    ));
+    toast({
+      title: "Status Updated",
+      description: `Test case status changed to ${newStatus}`,
+    });
   };
 
   return (
@@ -226,12 +237,16 @@ const TestCases = () => {
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
                       <span className="font-mono text-sm text-muted-foreground">{testCase.id}</span>
-                      <Badge className={getPriorityColor(testCase.priority)}>
-                        {testCase.priority}
-                      </Badge>
-                      <Badge className={getStatusColor(testCase.status)}>
-                        {testCase.status}
-                      </Badge>
+                      <PriorityToggle
+                        currentPriority={testCase.priority}
+                        onPriorityChange={(newPriority) => handlePriorityChange(testCase.id, newPriority)}
+                        size="sm"
+                      />
+                      <TestCaseStatusToggle
+                        currentStatus={testCase.status}
+                        onStatusChange={(newStatus) => handleStatusChange(testCase.id, newStatus)}
+                        size="sm"
+                      />
                     </div>
                     <CardTitle className="text-lg mb-2">{testCase.title}</CardTitle>
                     <div className="bg-secondary/50 p-3 rounded-lg">
@@ -280,10 +295,12 @@ const TestCases = () => {
                         <TestTube2 className="w-4 h-4 mr-2" />
                         Edit
                       </Button>
-                      <Button variant="ghost" size="sm">
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        View Details
-                      </Button>
+                      <Link to={`/projects/${id}/test-cases/${testCase.id}`}>
+                        <Button variant="ghost" size="sm">
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          View Details
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 </div>

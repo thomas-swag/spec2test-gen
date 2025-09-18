@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import StatsCard from "@/components/stats-card";
+import { ProjectStatusToggle } from "@/components/StatusToggle";
+import { useToast } from "@/hooks/use-toast";
 import { 
   TestTube2, 
   Shield, 
@@ -13,7 +16,7 @@ import { Link } from "react-router-dom";
 import heroImage from "@/assets/healthcare-hero.jpg";
 
 // Mock data for demonstration
-const recentProjects = [
+const mockProjects = [
   {
     id: 1,
     name: "Medical Device Validation",
@@ -44,6 +47,19 @@ const recentProjects = [
 ];
 
 const Dashboard = () => {
+  const [projects, setProjects] = useState(mockProjects);
+  const { toast } = useToast();
+  
+  const handleStatusChange = (projectId: number, newStatus: string) => {
+    setProjects(prev => prev.map(project => 
+      project.id === projectId ? { ...project, status: newStatus } : project
+    ));
+    toast({
+      title: "Project Status Updated",
+      description: `Project status changed to ${newStatus}`,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -117,7 +133,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentProjects.map((project) => (
+              {projects.map((project) => (
                 <div
                   key={project.id}
                   className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-secondary/50 transition-colors"
@@ -125,17 +141,11 @@ const Dashboard = () => {
                   <div className="flex-1">
                     <div className="flex items-center space-x-3">
                       <h3 className="font-semibold text-foreground">{project.name}</h3>
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          project.status === "completed"
-                            ? "bg-success/10 text-success"
-                            : project.status === "active"
-                            ? "bg-primary/10 text-primary"
-                            : "bg-warning/10 text-warning"
-                        }`}
-                      >
-                        {project.status}
-                      </span>
+                      <ProjectStatusToggle
+                        currentStatus={project.status}
+                        onStatusChange={(newStatus) => handleStatusChange(project.id, newStatus)}
+                        size="sm"
+                      />
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
                     <div className="flex items-center space-x-4 mt-2 text-xs text-muted-foreground">

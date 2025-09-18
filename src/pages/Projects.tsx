@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { ProjectStatusToggle } from "@/components/StatusToggle";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data for projects
 const projects = [
@@ -69,8 +71,20 @@ const projects = [
 const Projects = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [projectsList, setProjectsList] = useState(projects);
+  const { toast } = useToast();
+  
+  const handleStatusChange = (projectId: number, newStatus: string) => {
+    setProjectsList(prev => prev.map(project => 
+      project.id === projectId ? { ...project, status: newStatus } : project
+    ));
+    toast({
+      title: "Project Status Updated", 
+      description: `Project status changed to ${newStatus}`,
+    });
+  };
 
-  const filteredProjects = projects.filter(project => {
+  const filteredProjects = projectsList.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || project.status === statusFilter;
@@ -151,9 +165,6 @@ const Projects = () => {
                     <CardTitle className="text-lg mb-2">{project.name}</CardTitle>
                     <p className="text-sm text-muted-foreground">{project.description}</p>
                   </div>
-                  <Badge className={getStatusColor(project.status)}>
-                    {project.status}
-                  </Badge>
                 </div>
               </CardHeader>
               <CardContent>
