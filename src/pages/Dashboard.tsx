@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import StatsCard from "@/components/stats-card";
-import { ProjectStatusToggle } from "@/components/StatusToggle";
 import { useToast } from "@/hooks/use-toast";
+import { ProjectStatusToggle } from "@/components/StatusToggle";
 import { 
   TestTube2, 
   Shield, 
