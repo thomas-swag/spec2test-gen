@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
+import { PlatformIntegration } from "@/components/PlatformIntegration";
 
 const CreateProject = () => {
   const [projectName, setProjectName] = useState("");
@@ -68,6 +69,11 @@ const CreateProject = () => {
           <p className="text-muted-foreground mt-2">
             Set up a new healthcare compliance project for test case generation.
           </p>
+        </div>
+
+        {/* Platform Integration */}
+        <div className="mb-8">
+          <PlatformIntegration />
         </div>
 
         {/* Form */}

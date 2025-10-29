@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,11 +14,13 @@ import {
   Loader2,
   Download,
   Calendar,
-  Shield
+  Shield,
+  Network
 } from "lucide-react";
 
 const ProjectDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -82,28 +84,8 @@ const ProjectDetails = () => {
       return;
     }
 
-    setIsGenerating(true);
-    
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      toast({
-        title: "Test Cases Generated",
-        description: `Successfully generated ${Math.floor(Math.random() * 50 + 50)} test cases from uploaded requirements.`,
-      });
-      
-      // In a real app, redirect to test cases page
-      // navigate(`/projects/${id}/test-cases`);
-    } catch (error) {
-      toast({
-        title: "Generation Failed",
-        description: "Failed to generate test cases. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGenerating(false);
-    }
+    // Navigate to progress page with HITL
+    navigate(`/projects/${id}/generate-progress`);
   };
 
   return (
@@ -307,8 +289,14 @@ const ProjectDetails = () => {
             {/* Action Buttons */}
             <div className="mt-6 pt-6 border-t border-border">
               <div className="space-y-2">
-                <Link to={`/projects/${project.id}/test-cases`}>
+                <Link to={`/projects/${project.id}/feature-map`}>
                   <Button className="w-full">
+                    <Network className="w-4 h-4 mr-2" />
+                    View Feature Map
+                  </Button>
+                </Link>
+                <Link to={`/projects/${project.id}/test-cases`}>
+                  <Button variant="outline" className="w-full">
                     <TestTube2 className="w-4 h-4 mr-2" />
                     View All Test Cases
                   </Button>

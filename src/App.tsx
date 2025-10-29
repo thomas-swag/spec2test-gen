@@ -11,6 +11,8 @@ import ProjectDetails from "./pages/ProjectDetails";
 import TestCases from "./pages/TestCases";
 import TestCaseDetail from "./pages/TestCaseDetail";
 import Compliance from "./pages/Compliance";
+import TestGenerationProgress from "./pages/TestGenerationProgress";
+import FeatureMap from "./pages/FeatureMap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +29,8 @@ const App = () => (
           <Route path="/create-project" element={<CreateProject />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/projects/:id" element={<ProjectDetails />} />
+          <Route path="/projects/:id/generate-progress" element={<TestGenerationProgress />} />
+          <Route path="/projects/:id/feature-map" element={<FeatureMap />} />
           <Route path="/projects/:id/test-cases" element={<TestCases />} />
           <Route path="/projects/:id/test-cases/:testCaseId" element={<TestCaseDetail />} />
           <Route path="/compliance" element={<Compliance />} />
