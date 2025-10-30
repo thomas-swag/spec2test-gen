@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { PriorityToggle, TestCaseStatusToggle } from "@/components/StatusToggle";
+import { FeatureMapMindMap } from "@/components/FeatureMapMindMap";
 import { 
   ArrowLeft, 
   Download, 
@@ -14,7 +15,9 @@ import {
   Filter,
   TestTube2,
   Workflow,
-  Shield
+  Shield,
+  Network,
+  List
 } from "lucide-react";
 
 // Mock test cases data
@@ -84,6 +87,7 @@ const TestCases = () => {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [testCasesList, setTestCasesList] = useState(testCases);
+  const [viewMode, setViewMode] = useState<"list" | "mindmap">("list");
 
   const filteredTestCases = testCasesList.filter(testCase => {
     const matchesSearch = testCase.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -126,6 +130,26 @@ const TestCases = () => {
     });
   };
 
+  // Transform test cases into features for mind map
+  const features = useMemo(() => {
+    return [{
+      id: "feature-1",
+      name: "Medical Device Validation",
+      description: "Core validation features",
+      testCases: filteredTestCases.map(tc => ({
+        id: tc.id,
+        title: tc.title,
+        priority: tc.priority.toLowerCase() as "high" | "medium" | "low",
+        preconditions: [],
+        steps: tc.steps,
+        expectedResult: tc.requirement,
+        compliance: tc.complianceTags
+      })),
+      compliance: ["FDA 21 CFR Part 820", "ISO 13485"],
+      status: "in-progress" as const
+    }];
+  }, [filteredTestCases]);
+
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -143,6 +167,26 @@ const TestCases = () => {
               </p>
             </div>
             <div className="flex items-center space-x-3 mt-4 md:mt-0">
+              <div className="flex items-center border border-border rounded-lg">
+                <Button 
+                  variant={viewMode === "list" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className="rounded-r-none"
+                >
+                  <List className="w-4 h-4 mr-2" />
+                  List
+                </Button>
+                <Button 
+                  variant={viewMode === "mindmap" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("mindmap")}
+                  className="rounded-l-none"
+                >
+                  <Network className="w-4 h-4 mr-2" />
+                  Mind Map
+                </Button>
+              </div>
               <Button variant="outline">
                 <Download className="w-4 h-4 mr-2" />
                 Export CSV
@@ -199,8 +243,18 @@ const TestCases = () => {
           </CardContent>
         </Card>
 
-        {/* Sync Options */}
-        <Card className="mb-6">
+        {/* Mind Map View */}
+        {viewMode === "mindmap" && (
+          <div className="mb-6">
+            <FeatureMapMindMap features={features} />
+          </div>
+        )}
+
+        {/* List View */}
+        {viewMode === "list" && (
+          <>
+            {/* Sync Options */}
+            <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Workflow className="w-5 h-5 text-accent" />
@@ -309,16 +363,18 @@ const TestCases = () => {
           ))}
         </div>
 
-        {filteredTestCases.length === 0 && (
-          <Card className="mt-8">
-            <CardContent className="text-center py-12">
-              <TestTube2 className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium text-foreground">No test cases found</p>
-              <p className="text-sm text-muted-foreground">
-                Try adjusting your search or filter criteria
-              </p>
-            </CardContent>
-          </Card>
+            {filteredTestCases.length === 0 && (
+              <Card className="mt-8">
+                <CardContent className="text-center py-12">
+                  <TestTube2 className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium text-foreground">No test cases found</p>
+                  <p className="text-sm text-muted-foreground">
+                    Try adjusting your search or filter criteria
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
       </div>
     </div>

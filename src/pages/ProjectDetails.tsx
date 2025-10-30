@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { PlatformIntegration } from "@/components/PlatformIntegration";
 import { 
   ArrowLeft, 
   Upload, 
@@ -14,8 +15,7 @@ import {
   Loader2,
   Download,
   Calendar,
-  Shield,
-  Network
+  Shield
 } from "lucide-react";
 
 const ProjectDetails = () => {
@@ -153,13 +153,9 @@ const ProjectDetails = () => {
         {/* Main Content */}
         <Card>
           <CardContent className="p-6">
-            <Tabs defaultValue="upload" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="upload">Upload Requirements</TabsTrigger>
-                <TabsTrigger value="generate">Generate Test Cases</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="upload" className="space-y-6">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-4">Upload Requirements</h3>
                 {/* Upload Area */}
                 <div
                   className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
@@ -197,6 +193,9 @@ const ProjectDetails = () => {
                   </p>
                 </div>
 
+                {/* Platform Integration */}
+                <PlatformIntegration />
+
                 {/* Uploaded Files */}
                 {uploadedFiles.length > 0 && (
                   <div className="space-y-3">
@@ -226,24 +225,14 @@ const ProjectDetails = () => {
                     ))}
                   </div>
                 )}
-              </TabsContent>
-              
-              <TabsContent value="generate" className="space-y-6">
-                <div className="text-center py-8">
-                  <TestTube2 className="w-16 h-16 text-accent mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-foreground mb-2">
-                    Generate Test Cases
-                  </h3>
-                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    Generate comprehensive test cases from your uploaded requirements 
-                    with automated compliance mapping.
-                  </p>
-                  
+
+                {/* Generate Test Cases Button */}
+                <div className="pt-4">
                   <Button
                     onClick={generateTestCases}
                     disabled={isGenerating || uploadedFiles.length === 0}
                     size="lg"
-                    className="px-8"
+                    className="w-full"
                   >
                     {isGenerating ? (
                       <>
@@ -257,9 +246,8 @@ const ProjectDetails = () => {
                       </>
                     )}
                   </Button>
-                  
                   {uploadedFiles.length === 0 && (
-                    <p className="text-sm text-muted-foreground mt-4">
+                    <p className="text-sm text-muted-foreground text-center mt-2">
                       Please upload requirements documents first.
                     </p>
                   )}
@@ -283,20 +271,14 @@ const ProjectDetails = () => {
                     </p>
                   </CardContent>
                 </Card>
-              </TabsContent>
-            </Tabs>
+              </div>
+            </div>
             
             {/* Action Buttons */}
             <div className="mt-6 pt-6 border-t border-border">
               <div className="space-y-2">
-                <Link to={`/projects/${project.id}/feature-map`}>
-                  <Button className="w-full">
-                    <Network className="w-4 h-4 mr-2" />
-                    View Feature Map
-                  </Button>
-                </Link>
                 <Link to={`/projects/${project.id}/test-cases`}>
-                  <Button variant="outline" className="w-full">
+                  <Button className="w-full">
                     <TestTube2 className="w-4 h-4 mr-2" />
                     View All Test Cases
                   </Button>

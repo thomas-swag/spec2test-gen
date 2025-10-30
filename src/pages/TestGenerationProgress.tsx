@@ -4,18 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle2, ArrowRight } from "lucide-react";
 
-const loadingMessages = [
-  "Analyzing PRD document structure...",
-  "Extracting requirements and specifications...",
-  "Identifying test scenarios...",
-  "Generating test cases...",
-  "Building structured scenarios...",
-  "Mapping compliance standards...",
-  "Finalizing test case details..."
+const motivationalQuotes = [
+  "Writing intelligent test cases...",
+  "Analyzing modules and dependencies...",
+  "Structuring validation steps...",
+  "Mapping compliance requirements...",
+  "Building comprehensive scenarios...",
+  "Identifying edge cases...",
+  "Crafting precise test conditions...",
+  "Ensuring traceability...",
+  "Validating requirements coverage..."
 ];
 
 interface HITLQuestion {
@@ -62,7 +63,6 @@ const TestGenerationProgress = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const [progress, setProgress] = useState(0);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [showHITL, setShowHITL] = useState(false);
   const [hitlAnswers, setHitlAnswers] = useState<Record<string, string>>({});
@@ -70,25 +70,18 @@ const TestGenerationProgress = () => {
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    // Simulate progress
-    const progressInterval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 45) {
-          clearInterval(progressInterval);
-          setShowHITL(true);
-          return 45;
-        }
-        return prev + 5;
-      });
-    }, 800);
+    // Show HITL after initial loading
+    const hitlTimer = setTimeout(() => {
+      setShowHITL(true);
+    }, 3000);
 
-    // Rotate loading messages
+    // Rotate motivational quotes
     const messageInterval = setInterval(() => {
-      setCurrentMessageIndex(prev => (prev + 1) % loadingMessages.length);
+      setCurrentMessageIndex(prev => (prev + 1) % motivationalQuotes.length);
     }, 2500);
 
     return () => {
-      clearInterval(progressInterval);
+      clearTimeout(hitlTimer);
       clearInterval(messageInterval);
     };
   }, []);
@@ -101,26 +94,10 @@ const TestGenerationProgress = () => {
     setIsProcessingAnswers(true);
     setShowHITL(false);
 
-    // Simulate processing with answers
-    const continueProgress = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(continueProgress);
-          setIsComplete(true);
-          return 100;
-        }
-        return prev + 8;
-      });
-    }, 600);
-
-    // Continue rotating messages
-    const messageInterval = setInterval(() => {
-      setCurrentMessageIndex(prev => (prev + 1) % loadingMessages.length);
-    }, 2500);
-
+    // Simulate final processing
     setTimeout(() => {
-      clearInterval(messageInterval);
-    }, 5000);
+      setIsComplete(true);
+    }, 4000);
   };
 
   const handleComplete = () => {
@@ -128,7 +105,7 @@ const TestGenerationProgress = () => {
       title: "Test Cases Generated Successfully",
       description: "Your test cases have been enhanced with contextual insights.",
     });
-    navigate(`/projects/${id}/feature-map`);
+    navigate(`/projects/${id}/test-cases`);
   };
 
   return (
@@ -143,43 +120,56 @@ const TestGenerationProgress = () => {
           </p>
         </div>
 
-        {/* Progress Card */}
-        <Card className="mb-6">
-          <CardContent className="p-8">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-foreground">
-                  {isComplete ? "Complete" : `Progress: ${progress}%`}
-                </span>
-                {isComplete && (
-                  <CheckCircle2 className="w-5 h-5 text-success" />
-                )}
+        {/* Loading Card */}
+        {!showHITL && !isComplete && (
+          <Card className="mb-6">
+            <CardContent className="p-12">
+              <div className="flex flex-col items-center justify-center space-y-6">
+                <Loader2 className="w-16 h-16 animate-spin text-primary" />
+                <p className="text-lg text-muted-foreground animate-fade-in text-center">
+                  {motivationalQuotes[currentMessageIndex]}
+                </p>
               </div>
-              <Progress value={progress} className="h-3" />
-              
-              {!isComplete && (
-                <div className="flex items-center justify-center space-x-3 py-4">
-                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                  <p className="text-sm text-muted-foreground animate-fade-in">
-                    {loadingMessages[currentMessageIndex]}
-                  </p>
-                </div>
-              )}
-              
-              {isComplete && (
-                <div className="text-center py-4">
-                  <p className="text-lg font-semibold text-success mb-4">
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Completion Card */}
+        {isComplete && (
+          <Card className="mb-6 animate-fade-in">
+            <CardContent className="p-12">
+              <div className="flex flex-col items-center justify-center space-y-6">
+                <CheckCircle2 className="w-16 h-16 text-success" />
+                <div className="text-center">
+                  <p className="text-2xl font-semibold text-foreground mb-2">
                     Test cases generated successfully!
                   </p>
+                  <p className="text-muted-foreground mb-6">
+                    Your comprehensive test cases are ready for review
+                  </p>
                   <Button onClick={handleComplete} size="lg">
-                    View Feature Map
+                    View Test Cases
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Processing Card */}
+        {isProcessingAnswers && !isComplete && (
+          <Card className="mb-6 animate-fade-in">
+            <CardContent className="p-12">
+              <div className="flex flex-col items-center justify-center space-y-6">
+                <Loader2 className="w-16 h-16 animate-spin text-primary" />
+                <p className="text-lg text-muted-foreground animate-fade-in text-center">
+                  {motivationalQuotes[currentMessageIndex]}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Human-in-the-Loop Questions */}
         {showHITL && (
