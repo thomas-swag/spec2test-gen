@@ -20,7 +20,7 @@ import {
   List
 } from "lucide-react";
 
-// Mock test cases data
+// Mock test cases data - 13 test cases for comprehensive visualization
 const testCases = [
   {
     id: "TC-001",
@@ -32,7 +32,7 @@ const testCases = [
       "Record device measurement for 30 seconds",
       "Verify measurement is within 58-62 BPM range"
     ],
-    complianceTags: ["FDA 21 CFR Part 820", "ISO 13485"],
+    complianceTags: ["ISO 13485"],
     priority: "High",
     status: "Active"
   },
@@ -46,7 +46,7 @@ const testCases = [
       "Measure time to alarm activation",
       "Verify alarm triggers within 5 seconds"
     ],
-    complianceTags: ["IEC 60601-1-8", "FDA 21 CFR Part 820"],
+    complianceTags: ["IEC 60601"],
     priority: "Critical",
     status: "Active"
   },
@@ -60,7 +60,7 @@ const testCases = [
       "Verify all data points are stored",
       "Check for data corruption or gaps"
     ],
-    complianceTags: ["FDA 21 CFR Part 11", "ISO 13485"],
+    complianceTags: ["FDA 21 CFR"],
     priority: "Medium",
     status: "Review"
   },
@@ -74,8 +74,134 @@ const testCases = [
       "Test password complexity requirements",
       "Validate session timeout functionality"
     ],
-    complianceTags: ["FDA Cybersecurity", "HIPAA"],
+    complianceTags: ["HIPAA"],
     priority: "High", 
+    status: "Active"
+  },
+  {
+    id: "TC-005",
+    title: "Verify blood pressure measurement range",
+    requirement: "Device shall measure BP from 40-280 mmHg",
+    steps: [
+      "Connect to BP simulator",
+      "Test minimum range (40 mmHg)",
+      "Test maximum range (280 mmHg)",
+      "Verify accuracy at extremes"
+    ],
+    complianceTags: ["ISO 13485"],
+    priority: "High",
+    status: "Active"
+  },
+  {
+    id: "TC-006",
+    title: "Test battery life under continuous use",
+    requirement: "Battery shall last minimum 8 hours continuous use",
+    steps: [
+      "Fully charge device battery",
+      "Start continuous monitoring",
+      "Record battery drain rate",
+      "Verify 8+ hour operation"
+    ],
+    complianceTags: ["IEC 60601"],
+    priority: "Medium",
+    status: "Active"
+  },
+  {
+    id: "TC-007",
+    title: "Validate wireless data transmission",
+    requirement: "Data shall transmit wirelessly with <1% packet loss",
+    steps: [
+      "Configure wireless connection",
+      "Transmit test data packets",
+      "Monitor transmission quality",
+      "Verify packet loss <1%"
+    ],
+    complianceTags: ["FDA 21 CFR"],
+    priority: "High",
+    status: "Review"
+  },
+  {
+    id: "TC-008",
+    title: "Test emergency stop functionality",
+    requirement: "Device shall stop immediately when emergency button pressed",
+    steps: [
+      "Start normal operation",
+      "Press emergency stop",
+      "Measure response time",
+      "Verify immediate cessation"
+    ],
+    complianceTags: ["IEC 60601"],
+    priority: "Critical",
+    status: "Active"
+  },
+  {
+    id: "TC-009",
+    title: "Verify temperature sensor accuracy",
+    requirement: "Temperature sensor accurate to ±0.2°C",
+    steps: [
+      "Calibrate reference thermometer",
+      "Measure known temperature",
+      "Compare device reading",
+      "Verify within tolerance"
+    ],
+    complianceTags: ["ISO 13485"],
+    priority: "High",
+    status: "Active"
+  },
+  {
+    id: "TC-010",
+    title: "Test device sterilization compatibility",
+    requirement: "Device shall withstand autoclave sterilization cycles",
+    steps: [
+      "Prepare device for sterilization",
+      "Run standard autoclave cycle",
+      "Inspect for damage",
+      "Verify functionality post-sterilization"
+    ],
+    complianceTags: ["ISO 13485"],
+    priority: "Medium",
+    status: "Completed"
+  },
+  {
+    id: "TC-011",
+    title: "Validate error logging system",
+    requirement: "All errors shall be logged with timestamp",
+    steps: [
+      "Trigger various error conditions",
+      "Check error log entries",
+      "Verify timestamp accuracy",
+      "Confirm log integrity"
+    ],
+    complianceTags: ["FDA 21 CFR"],
+    priority: "Medium",
+    status: "Active"
+  },
+  {
+    id: "TC-012",
+    title: "Test display screen visibility",
+    requirement: "Display readable in ambient light 0-100k lux",
+    steps: [
+      "Set up controlled lighting",
+      "Test at minimum brightness",
+      "Test at maximum brightness",
+      "Verify readability across range"
+    ],
+    complianceTags: ["IEC 60601"],
+    priority: "Medium",
+    status: "Review"
+  },
+  {
+    id: "TC-013",
+    title: "Verify software version tracking",
+    requirement: "Software version shall be displayed and traceable",
+    steps: [
+      "Access device settings",
+      "Locate version information",
+      "Verify version matches documentation",
+      "Test version update process"
+    ],
+    complianceTags: ["FDA 21 CFR"],
+    priority: "Low",
     status: "Active"
   }
 ];
@@ -105,6 +231,8 @@ const TestCases = () => {
         return "bg-warning/10 text-warning border-warning/20";
       case "Medium":
         return "bg-primary/10 text-primary border-primary/20";
+      case "Low":
+        return "bg-muted text-muted-foreground border-muted";
       default:
         return "bg-muted text-muted-foreground";
     }
@@ -136,15 +264,25 @@ const TestCases = () => {
       id: "feature-1",
       name: "Medical Device Validation",
       description: "Core validation features",
-      testCases: filteredTestCases.map(tc => ({
-        id: tc.id,
-        title: tc.title,
-        priority: tc.priority.toLowerCase() as "high" | "medium" | "low",
-        preconditions: [],
-        steps: tc.steps,
-        expectedResult: tc.requirement,
-        compliance: tc.complianceTags
-      })),
+      testCases: filteredTestCases.map(tc => {
+        // Map priority to mind map format
+        let priority: "high" | "medium" | "low" = "medium";
+        if (tc.priority === "Critical" || tc.priority === "High") {
+          priority = "high";
+        } else if (tc.priority === "Low") {
+          priority = "low";
+        }
+        
+        return {
+          id: tc.id,
+          title: tc.title,
+          priority,
+          preconditions: [],
+          steps: tc.steps,
+          expectedResult: tc.requirement,
+          compliance: tc.complianceTags
+        };
+      }),
       compliance: ["FDA 21 CFR Part 820", "ISO 13485"],
       status: "in-progress" as const
     }];
@@ -226,6 +364,7 @@ const TestCases = () => {
                     <option value="Critical">Critical</option>
                     <option value="High">High</option>
                     <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
                   </select>
                 </div>
                 <select

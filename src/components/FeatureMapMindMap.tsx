@@ -54,55 +54,69 @@ const getPriorityColor = (priority: TestCase["priority"]) => {
 };
 
 export const FeatureMapMindMap = ({ features }: FeatureMapMindMapProps) => {
-  const initialNodes: Node[] = useMemo(() => {
+const initialNodes: Node[] = useMemo(() => {
     const nodes: Node[] = [];
     
-    // Root node
+    const totalTestCases = features.reduce((sum, f) => sum + f.testCases.length, 0);
+    const testCasesPerColumn = 5; // Maximum test cases per column
+    const testCaseWidth = 220;
+    const testCaseHeight = 100;
+    const verticalSpacing = 30;
+    const horizontalSpacing = 100;
+    const featureHeight = 120;
+    
+    // Calculate grid dimensions
+    const columns = Math.ceil(totalTestCases / testCasesPerColumn);
+    const gridWidth = columns * (testCaseWidth + horizontalSpacing);
+    
+    // Root node - centered at top
+    const rootX = (gridWidth / 2) - 100;
     nodes.push({
       id: "root",
       type: "default",
       data: { 
         label: (
-          <div className="px-4 py-2">
-            <div className="font-bold text-lg">Project Features</div>
-            <div className="text-xs text-muted-foreground">{features.length} features</div>
+          <div className="px-6 py-3">
+            <div className="font-bold text-lg">Medical Device Validation</div>
+            <div className="text-xs text-muted-foreground mt-1">{totalTestCases} test cases</div>
           </div>
         )
       },
-      position: { x: 400, y: 50 },
+      position: { x: rootX, y: 50 },
       style: {
         background: "hsl(var(--primary))",
         color: "hsl(var(--primary-foreground))",
         border: "2px solid hsl(var(--primary))",
-        borderRadius: "8px",
+        borderRadius: "12px",
         fontSize: "14px",
-        width: 200,
+        width: 280,
+        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
       },
       sourcePosition: Position.Bottom,
     });
 
-    // Feature nodes
+    // Feature node - centered below root
     features.forEach((feature, featureIndex) => {
-      const featureX = 150 + (featureIndex * 350);
-      const featureY = 250;
+      const featureX = rootX + 40;
+      const featureY = 220;
       
       nodes.push({
         id: feature.id,
         type: "default",
         data: { 
           label: (
-            <div className="px-3 py-2">
-              <div className="font-semibold text-sm mb-1">{feature.name}</div>
+            <div className="px-4 py-3 text-center">
+              <div className="font-semibold text-base mb-2">{feature.name}</div>
               <Badge 
                 style={{ 
                   backgroundColor: getStatusColor(feature.status),
-                  fontSize: "10px",
-                  padding: "2px 6px"
+                  fontSize: "11px",
+                  padding: "4px 8px"
                 }}
               >
                 {feature.status}
               </Badge>
-              <div className="text-xs text-muted-foreground mt-1">
+              <div className="text-xs text-muted-foreground mt-2">
                 {feature.testCases.length} test cases
               </div>
             </div>
@@ -112,18 +126,28 @@ export const FeatureMapMindMap = ({ features }: FeatureMapMindMapProps) => {
         style: {
           background: "hsl(var(--card))",
           color: "hsl(var(--card-foreground))",
-          border: `2px solid ${getStatusColor(feature.status)}`,
-          borderRadius: "8px",
-          fontSize: "12px",
-          width: 220,
+          border: `3px solid ${getStatusColor(feature.status)}`,
+          borderRadius: "12px",
+          fontSize: "13px",
+          width: 280,
+          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
         },
         sourcePosition: Position.Bottom,
         targetPosition: Position.Top,
       });
 
-      // Test case nodes
+      // Test case nodes - arranged in grid layout
       feature.testCases.forEach((testCase, testIndex) => {
-        const testY = 450 + (testIndex * 120);
+        const column = Math.floor(testIndex / testCasesPerColumn);
+        const row = testIndex % testCasesPerColumn;
+        
+        const testX = (column * (testCaseWidth + horizontalSpacing)) + 50;
+        const testY = 450 + (row * (testCaseHeight + verticalSpacing));
+        
+        // Get first compliance tag for display
+        const complianceTag = testCase.compliance && testCase.compliance.length > 0 
+          ? testCase.compliance[0] 
+          : "N/A";
         
         nodes.push({
           id: testCase.id,
@@ -131,27 +155,37 @@ export const FeatureMapMindMap = ({ features }: FeatureMapMindMapProps) => {
           data: { 
             label: (
               <div className="px-3 py-2">
-                <div className="text-xs font-medium mb-1">{testCase.title}</div>
-                <Badge 
-                  style={{ 
-                    backgroundColor: getPriorityColor(testCase.priority),
-                    fontSize: "9px",
-                    padding: "2px 4px"
-                  }}
-                >
-                  {testCase.priority}
-                </Badge>
+                <div className="text-xs font-semibold mb-2 line-clamp-2 leading-tight">
+                  {testCase.title}
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <Badge 
+                    style={{ 
+                      backgroundColor: getPriorityColor(testCase.priority),
+                      fontSize: "9px",
+                      padding: "2px 6px",
+                      flexShrink: 0
+                    }}
+                  >
+                    {testCase.priority}
+                  </Badge>
+                  <span className="text-[9px] text-muted-foreground truncate">
+                    {complianceTag}
+                  </span>
+                </div>
               </div>
             )
           },
-          position: { x: featureX - 50, y: testY },
+          position: { x: testX, y: testY },
           style: {
-            background: "hsl(var(--secondary))",
-            color: "hsl(var(--secondary-foreground))",
-            border: `1px solid ${getPriorityColor(testCase.priority)}`,
-            borderRadius: "6px",
+            background: "hsl(var(--card))",
+            color: "hsl(var(--card-foreground))",
+            border: `2px solid ${getPriorityColor(testCase.priority)}`,
+            borderRadius: "8px",
             fontSize: "11px",
-            width: 200,
+            width: testCaseWidth,
+            height: testCaseHeight,
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
           },
           targetPosition: Position.Top,
         });
