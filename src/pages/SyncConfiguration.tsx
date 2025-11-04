@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, ExternalLink, Shield, Loader2 } from "lucide-react";
+import { ArrowLeft, ExternalLink, Shield, Loader2, Eye } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 // Mock test cases data - same as TestCases page
@@ -335,13 +335,24 @@ const SyncConfiguration = () => {
                   />
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-2">
-                      <Label 
-                        htmlFor={testCase.id}
-                        className="font-semibold text-foreground cursor-pointer"
-                      >
-                        {testCase.id}: {testCase.title}
-                      </Label>
+                      <div className="flex-1">
+                        <Label 
+                          htmlFor={testCase.id}
+                          className="font-semibold text-foreground cursor-pointer"
+                        >
+                          {testCase.id}: {testCase.title}
+                        </Label>
+                      </div>
                       <div className="flex items-center space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate(`/projects/${id}/test-cases/${testCase.id}`)}
+                          className="h-8"
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          View Details
+                        </Button>
                         <Badge 
                           variant="outline" 
                           className={getPriorityColor(testCase.priority)}
