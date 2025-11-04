@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -208,6 +208,7 @@ const testCases = [
 
 const TestCases = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -402,15 +403,27 @@ const TestCases = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3">
-              <Button variant="outline" className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                className="flex items-center space-x-2"
+                onClick={() => navigate(`/projects/${id}/sync?platform=Jira`)}
+              >
                 <ExternalLink className="w-4 h-4" />
                 <span>Sync to Jira</span>
               </Button>
-              <Button variant="outline" className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                className="flex items-center space-x-2"
+                onClick={() => navigate(`/projects/${id}/sync?platform=Polarion`)}
+              >
                 <ExternalLink className="w-4 h-4" />
                 <span>Sync to Polarion</span>
               </Button>
-              <Button variant="outline" className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                className="flex items-center space-x-2"
+                onClick={() => navigate(`/projects/${id}/sync?platform=Azure DevOps`)}
+              >
                 <ExternalLink className="w-4 h-4" />
                 <span>Sync to Azure DevOps</span>
               </Button>
