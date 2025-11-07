@@ -14,7 +14,8 @@ import {
   FileText,
   Clock,
   User,
-  Settings
+  Settings,
+  Link as LinkIcon
 } from "lucide-react";
 import { PriorityToggle, TestCaseStatusToggle } from "@/components/StatusToggle";
 import {
@@ -73,7 +74,17 @@ const testCaseData = {
   ],
   complianceStandard: "FDA 21 CFR Part 820",
   complianceClause: "820.30(g)",
-  complianceRequirementText: "Design controls shall include procedures for ensuring that the design requirements relating to a device are appropriate and address the intended use of the device, including the performance and safety requirements."
+  complianceRequirementText: "Design controls shall include procedures for ensuring that the design requirements relating to a device are appropriate and address the intended use of the device, including the performance and safety requirements.",
+  linkedRequirements: [
+    {
+      id: "REQ-001",
+      description: "The system shall measure heart rate with an accuracy of ±2 BPM when tested against a calibrated patient simulator."
+    },
+    {
+      id: "REQ-002",
+      description: "The device shall respond to heart rate signal detection within 5 seconds and maintain stable readings throughout the monitoring period."
+    }
+  ]
 };
 
 const TestCaseDetail = () => {
@@ -347,6 +358,43 @@ const TestCaseDetail = () => {
                     {testCase.complianceRequirementText}
                   </p>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Requirement Traceability */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <LinkIcon className="w-5 h-5 text-accent" />
+                  <span>Requirement Traceability</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {testCase.linkedRequirements.map((req, index) => (
+                  <div key={req.id}>
+                    {index > 0 && <Separator className="my-4" />}
+                    <div>
+                      <label className="text-sm font-medium text-foreground">Requirement ID</label>
+                      <Badge variant="outline" className="mt-1 w-full justify-start font-mono">
+                        {req.id}
+                      </Badge>
+                    </div>
+                    
+                    <div className="mt-3">
+                      <label className="text-sm font-medium text-foreground">Requirement Description</label>
+                      <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                        {req.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                
+                <Separator className="my-4" />
+                
+                <Button variant="outline" size="sm" className="w-full">
+                  <LinkIcon className="w-4 h-4 mr-2" />
+                  Link Requirement
+                </Button>
               </CardContent>
             </Card>
 
